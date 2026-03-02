@@ -1,0 +1,243 @@
+Hi there! As an intern on the dev team, I’ve put together a clean, documented Python script for the Caesar Cipher project. I focused on making the code modular and easy for other developers to read, while ensuring the user interface is intuitive.
+I’ve used the formula 
+ for encryption and 
+ for decryption, where 
+ is the plaintext and 
+ is the ciphertext.
+Caesar Cipher Tool
+This script handles both uppercase and lowercase letters while keeping punctuation and numbers intact.
+
+
+Key Features of My Implementation:
+Modulo Arithmetic: Uses % 26 to ensure that a shift of 1 on the letter 'Z' correctly wraps back to 'A'.
+Case Sensitivity: It recognizes the difference between 'A' (ASCII 65) and 'a' (ASCII 97), preserving the look of the original message.
+Input Validation: I added a try-except block to handle cases where a user accidentally types a letter instead of a number for the shift value.
+Non-Alpha Preservation: Symbols, spaces, and numbers are not altered, which is standard for a basic Caesar Cipher.
+How to use it:
+Run the script.
+Choose 'E' to hide a message or 'D' to reveal one.
+Enter your text and the "key" (the shift number).
+To decrypt, just use the same shift number you used to encrypt!
+
+
+
+def caesar_cipher(text, shift, mode='encrypt'):
+    """
+    Performs Caesar Cipher encryption or decryption.
+    :param text: The string to be processed
+    :param shift: The integer value for character rotation
+    :param mode: 'encrypt' or 'decrypt'
+    :return: The processed string
+    """
+    result = ""
+    
+    # If decrypting, we simply reverse the shift
+    if mode == 'decrypt':
+        shift = -shift
+
+    for char in text:
+        # Process uppercase letters
+        if char.isupper():
+            # Apply shift and wrap around using modulo 26
+            result += chr((ord(char) + shift - 65) % 26 + 65)
+        # Process lowercase letters
+        elif char.islower():
+            result += chr((ord(char) + shift - 97) % 26 + 97)
+        # Leave non-alphabetic characters as they are
+        else:
+            result += char
+            
+    return result
+
+def main():
+    print("--- Intern Project: Caesar Cipher Tool ---")
+    
+    while True:
+        choice = input("\nDo you want to (E)ncrypt, (D)ecrypt, or (Q)uit? ").upper()
+        
+        if choice == 'Q':
+            print("Exiting tool. Have a great day!")
+            break
+            
+        if choice in ['E', 'D']:
+            message = input("Enter your message: ")
+            try:
+                shift_val = int(input("Enter shift value (e.g., 3): "))
+            except ValueError:
+                print("Invalid input. Please enter a number for the shift.")
+                continue
+                
+            mode = 'encrypt' if choice == 'E' else 'decrypt'
+            output = caesar_cipher(message, shift_val, mode)
+            
+            print(f"\nResulting Text: {output}")
+        else:
+            print("Invalid choice, please select E, D, or Q.")
+
+if __name__ == "__main__":
+    main()
+
+
+Every time you perform an encryption or decryption, the tool will now append the result to a file named cipher_log.txt with a timestamp
+
+
+from datetime import datetime
+
+def caesar_cipher(text, shift, mode='encrypt'):
+    result = ""
+    if mode == 'decrypt':
+        shift = -shift
+
+    for char in text:
+        if char.isupper():
+            result += chr((ord(char) + shift - 65) % 26 + 65)
+        elif char.islower():
+            result += chr((ord(char) + shift - 97) % 26 + 97)
+        else:
+            result += char
+    return result
+
+def log_to_file(mode, original, result, shift):
+    """
+    Appends the operation details to a log file.
+    """
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = (
+        f"[{timestamp}] MODE: {mode.upper()} | SHIFT: {shift}\n"
+        f"INPUT:  {original}\n"
+        f"OUTPUT: {result}\n"
+        + "-"*40 + "\n"
+    )
+    
+    # Using 'a' mode to append data to the end of the file
+    # We specify utf-8 encoding to ensure all characters are handled correctly
+    with open("cipher_log.txt", "a", encoding="utf-8") as f:
+        f.write(log_entry)
+
+def main():
+    print("--- Intern Project: Caesar Cipher Tool with Auto-Logging ---")
+    
+    while True:
+        choice = input("\n(E)ncrypt, (D)ecrypt, or (Q)uit? ").upper()
+        
+        if choice == 'Q':
+            print("Exiting. Check 'cipher_log.txt' for your history!")
+            break
+            
+        if choice in ['E', 'D']:
+            message = input("Enter message: ")
+            try:
+                shift_val = int(input("Enter shift: "))
+            except ValueError:
+                print("Error: Shift must be an integer.")
+                continue
+                
+            mode = 'encrypt' if choice == 'E' else 'decrypt'
+            output = caesar_cipher(message, shift_val, mode)
+            
+            # Auto-save the results
+            log_to_file(mode, message, output, shift_val)
+            
+            print(f"\nResult: {output}")
+            print("(Saved to cipher_log.txt)")
+        else:
+            print("Invalid choice.")
+
+if __name__ == "__main__":
+    main()
+
+
+Internship Project Enhancements:
+Persistent Storage: By opening the file in append mode ('a'), the program creates cipher_log.txt if it doesn't exist or adds to it if it does, preventing any data loss from previous runs.
+
+Datetime Integration: I used the datetime.now() function to provide a clear audit trail of when each message was processed.
+
+Encoding Safety: Explicitly setting encoding="utf-8" is a professional best practice to ensure compatibility across different operating systems
+
+As an intern, I’ve added a Security Mode to protect our history. This is a common requirement for internal tools—ensuring that only authorized team members can view the logs. 
+I used the getpass module to hide the password as you type it in the terminal, preventing "shoulder surfing". 
+
+import getpass
+from datetime import datetime
+
+# Intern Note: Hardcoding passwords is usually a no-no in production (we'd use env vars),
+# but for this local tool, I've set a 'SECRET_KEY'.
+SECRET_KEY = "intern2024"
+
+def caesar_cipher(text, shift, mode='encrypt'):
+    result = ""
+    if mode == 'decrypt':
+        shift = -shift
+    for char in text:
+        if char.isupper():
+            result += chr((ord(char) + shift - 65) % 26 + 65)
+        elif char.islower():
+            result += chr((ord(char) + shift - 97) % 26 + 97)
+        else:
+            result += char
+    return result
+
+def log_to_file(mode, original, result, shift):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = (
+        f"[{timestamp}] MODE: {mode.upper()} | SHIFT: {shift}\n"
+        f"INPUT:  {original}\n"
+        f"OUTPUT: {result}\n" + "-"*40 + "\n"
+    )
+    with open("cipher_log.txt", "a", encoding="utf-8") as f:
+        f.write(log_entry)
+
+def view_logs():
+    """
+    Intern Security Feature: Requires a password to read the log file.
+    """
+    # getpass.getpass hides the characters as the user types
+    password = getpass.getpass("Enter Security Password to view history: ")
+    
+    if password == SECRET_KEY:
+        print("\n--- ACCESS GRANTED: LOG HISTORY ---")
+        try:
+            with open("cipher_log.txt", "r") as f:
+                print(f.read())
+        except FileNotFoundError:
+            print("No log file found yet. Start encrypting!")
+    else:
+        print("ACCESS DENIED: Incorrect password.")
+
+def main():
+    print("--- Intern Project: Secure Caesar Cipher v2.0 ---")
+    
+    while True:
+        choice = input("\n(E)ncrypt, (D)ecrypt, (V)iew Logs, or (Q)uit? ").upper()
+        
+        if choice == 'Q':
+            print("Exiting tool. Goodbye!")
+            break
+        elif choice == 'V':
+            view_logs()
+        elif choice in ['E', 'D']:
+            message = input("Enter message: ")
+            try:
+                shift_val = int(input("Enter shift: "))
+            except ValueError:
+                print("Error: Shift must be an integer.")
+                continue
+                
+            mode = 'encrypt' if choice == 'E' else 'decrypt'
+            output = caesar_cipher(message, shift_val, mode)
+            log_to_file(mode, message, output, shift_val)
+            
+            print(f"\nResult: {output}")
+        else:
+            print("Invalid choice. Try E, D, V, or Q.")
+
+if __name__ == "__main__":
+    main()
+
+
+Internship Project Log:
+Invisible Input: I implemented getpass.getpass() for the password prompt so that your password doesn't show up in the terminal history or on the screen.
+
+Access Control: The view_logs() function acts as a gatekeeper, only allowing access to the file if the SECRET_KEY matches.
+
+Error Handling: Added a check for FileNotFoundError in case someone tries to view logs before the first encryption has occurred.
